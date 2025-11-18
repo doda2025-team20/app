@@ -24,4 +24,4 @@ ENV APP_PORT=8080
 
 EXPOSE ${APP_PORT}
 
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
