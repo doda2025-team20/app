@@ -10,7 +10,7 @@ on:
 
 jobs:
   release:
-    uses: doda25-team20/build-tools/.github/workflows/docker-release.yml@v1
+    uses: doda25-team20/build-tools/.github/workflows/docker-release.yml@main
     permissions:
       contents: read
       packages: write
