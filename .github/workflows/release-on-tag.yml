@@ -7,12 +7,12 @@ on:
 
 jobs:
   release:
-    uses: doda25-team20/build-tools/.github/workflows/docker-release.yml@v1
+    uses: doda2025-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
     permissions:
       contents: read
       packages: write
     with:
-      image: ghcr.io/doda25-team20/app
+      image: ghcr.io/doda2025-team20/app
       context: .
       dockerfile: ./Dockerfile
       platforms: linux/amd64,linux/arm64

@@ -10,12 +10,12 @@ on:
 
 jobs:
   release:
-    uses: doda25-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
+    uses: doda2025-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
     permissions:
       contents: read
       packages: write
     with:
-      image: ghcr.io/doda25-team20/app-sandbox
+      image: ghcr.io/doda2025-team20/app-sandbox
       context: .
       dockerfile: ./Dockerfile
       platforms: linux/amd64,linux/arm64
