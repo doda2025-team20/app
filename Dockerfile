@@ -22,6 +22,6 @@ COPY --from=build /app/target/*.jar app.jar
 ENV MODEL_HOST="http://localhost:8081"
 ENV APP_PORT=8080
 
-EXPOSE 8080
+EXPOSE ${APP_PORT}
 
 CMD ["java", "-jar", "app.jar"]
