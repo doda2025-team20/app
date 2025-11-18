@@ -10,12 +10,12 @@ on:
 
 jobs:
   release:
-    uses: doda25-team12/build-tools/.github/workflows/docker-release.yml@v1
+    uses: doda25-team20/build-tools/.github/workflows/docker-release.yml@v1
     permissions:
       contents: read
       packages: write
     with:
-      image: ghcr.io/doda25-team12/app-sandbox
+      image: ghcr.io/doda25-team20/app-sandbox
       context: .
       dockerfile: ./Dockerfile
       platforms: linux/amd64,linux/arm64
