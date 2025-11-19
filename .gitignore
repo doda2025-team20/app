@@ -2,6 +2,9 @@
 .idea/
 releng
 
+# Maven local secrets (PATs, settings.xml, etc.)
+**/.m2/
+**/.m2/**
 
 ### frontend-specific ###
 
