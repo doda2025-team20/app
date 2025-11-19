@@ -25,7 +25,7 @@ jobs:
       platforms: linux/amd64,linux/arm64
     secrets: inherit
   release_on_main:
-    if: startsWith(github.ref, 'refs/tags/')  # only runs for tag pushes
+    if: github.ref == 'refs/heads/main'      # only runs for pushes to main
     uses: doda2025-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
     permissions:
       contents: read
