@@ -17,7 +17,15 @@
 		<java.version>25</java.version>
 	</properties>
 
-	<dependencies>
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>GitHub doda2025-team20 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/doda2025-team20/lib-version</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -32,7 +40,13 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+
+        <dependency>
+            <groupId>sms</groupId>
+            <artifactId>lib-version</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
