@@ -1,0 +1,5 @@
+# prevent accidental upload of m2 settings into build context
+.m2
+.m2/**
+**/.m2
+settings.xml
