@@ -21,7 +21,6 @@ http://localhost:8080/sms
 ## Running the frontend via Docker
 
 The container image for the app repository is published to GitHub Container Registry (GHCR).
-Replace <org> with the name of your GitHub organization.
 
 Pull the image
 ```bash
