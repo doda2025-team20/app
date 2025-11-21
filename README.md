@@ -29,7 +29,7 @@ The container image for the app repository is published to GitHub Container Regi
 
 Pull the image
 ```bash
-docker pull ghcr.io/doda2025-team20/frontend:latest
+docker pull ghcr.io/doda2025-team20/app:latest
 ```
 
 If the repository is private, authenticate first:
@@ -43,7 +43,7 @@ Run the container
 docker run \
   -p 8080:8080 \
   -e MODEL_HOST="http://model-service:8081" \
-  ghcr.io/doda2025-team20/frontend:latest
+  ghcr.io/doda2025-team20/app:latest
 ```
 
 The frontend will start on port 8080 inside the container, mapped to port 8080 on your host.
