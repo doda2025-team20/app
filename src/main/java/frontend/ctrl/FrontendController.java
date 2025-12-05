@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpServletRequest;
 public class FrontendController {
 
     private String modelHost;
-
     private RestTemplateBuilder rest;
 
     public FrontendController(RestTemplateBuilder rest, Environment env) {
@@ -60,9 +59,26 @@ public class FrontendController {
     @PostMapping({ "", "/" })
     @ResponseBody
     public Sms predict(@RequestBody Sms sms) {
+
+        long start = System.nanoTime(); // Start latency timer
+
         System.out.printf("Requesting prediction for \"%s\" ...\n", sms.sms);
+
+        // Perform prediction via model-service
         sms.result = getPrediction(sms);
         System.out.printf("Prediction: %s\n", sms.result);
+
+        long end = System.nanoTime(); // End timer
+        double durationSeconds = (end - start) / 1_000_000_000.0;
+
+        // Until your model-service returns confidence → placeholder
+        double confidence = 0.5;
+
+        boolean isSpam = sms.result.equalsIgnoreCase("spam");
+
+        // A3-required metrics instrumentation
+        MetricsController.recordClassification(isSpam, confidence, durationSeconds);
+
         return sms;
     }
 
