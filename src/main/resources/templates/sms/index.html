@@ -1,28 +1,159 @@
-<html>
-<head>
-<meta charset="UTF-8" />
-<title>SMS Checker</title>
-<link rel="stylesheet" th:href="@{/sms/format.css}" />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script th:src="@{/sms/script.js}"></script>
-</head>
-<body>
-<span id="hostname" th:text="${hostname}"></span>
-<h1>SMS Checker</h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SMS Checker</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script th:src="@{/sms/script.js}"></script>
+    <link th:href="@{/icon.svg}" rel="icon" type="image/svg+xml" />
+  </head>
+  <body class="bg-gray-50 min-h-screen flex flex-col items-center py-10">
+    <div class="container mx-auto p-4 flex flex-col items-center w-full max-w-4xl">
+      <h1 class="text-2xl font-bold mb-2 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-mail-search"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 19h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v4.5" /><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M20.2 20.2l1.8 1.8" /><path d="M3 7l9 6l9 -6" /></svg>
+        SMS Checker
+      </h1>
+	    <p class="mb-6 text-center text-gray-600">
+		    Enter an SMS message below and select whether you think it's ham or spam.
+		    Click "Check SMS" to see if the classifier agrees with your guess!
+	    </p>
 
-<form>
+      <form
+        class="w-full bg-white shadow-md rounded-xl p-6 border border-gray-200 space-y-4">
 
-<textarea>Example SMS ...</textarea><br />
+        <h5 class="text-xl font-semibold text-heading mb-2">Check a Message</h5>
 
-<div class="radio">
-	<input type="radio" name="guess" value="ham" checked="checked" /> Ham<br />
-	<input type="radio" name="guess" value="spam" /> Spam<br />
-</div>
+		    <span>
+          <label
+            for="smsInput"
+            class="block mb-2 text-md font-medium text-gray-700">
+            Enter SMS Message:
+          </label>
+          <textarea
+            id="smsInput"
+            name="smsInput"
+            rows="4"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            placeholder="Type your SMS message here...">Example SMS...</textarea>
+		    </span>
 
-<button>Send</button>
-</form>
+        <ul class="grid w-full gap-4 md:grid-cols-2">
+          <li>
+            <input
+              type="radio"
+              name="guess"
+              id="ham"
+              value="ham"
+              class="sr-only peer"
+              checked="checked"
+            />
+            <label
+              for="ham"
+              class="flex flex-col items-center justify-center w-full p-5 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 peer-checked:border-green-600 peer-checked:bg-green-50"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-meat"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M13.62 8.382l1.966 -1.967a2 2 0 1 1 3.414 -1.415a2 2 0 1 1 -1.413 3.414l-1.82 1.821"
+                />
+                <path
+                  d="M5.904 18.596c2.733 2.734 5.9 4 7.07 2.829c1.172 -1.172 -.094 -4.338 -2.828 -7.071c-2.733 -2.734 -5.9 -4 -7.07 -2.829c-1.172 1.172 .094 4.338 2.828 7.071z"
+                />
+                <path d="M7.5 16l1 1" />
+                <path
+                  d="M12.975 21.425c3.905 -3.906 4.855 -9.288 2.121 -12.021c-2.733 -2.734 -8.115 -1.784 -12.02 2.121"
+                />
+              </svg>
+              <div class="text-lg font-semibold">Ham</div>
+              <div class="text-sm text-gray-500">
+                This message is legitimate.
+              </div>
+            </label>
+          </li>
 
-<p id="result"></p>
+          <li>
+            <input
+              type="radio"
+              id="spam"
+              name="guess"
+              value="spam"
+              class="sr-only peer"
+            />
+            <label
+              for="spam"
+              class="flex flex-col items-center justify-center w-full p-5 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 peer-checked:border-red-600 peer-checked:bg-red-50"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-mail-exclamation"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M15 19h-10a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v5.5"
+                />
+                <path d="M3 7l9 6l9 -6" />
+                <path d="M19 16v3" />
+                <path d="M19 22v.01" />
+              </svg>
+              <div class="text-lg font-semibold">Spam</div>
+              <div class="text-sm text-gray-500">
+                This message is unwanted or harmful.
+              </div>
+            </label>
+          </li>
+        </ul>
 
-</body>
+        <button
+		      type="button"
+		      id="checkButton"
+		      class="relative w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 
+		             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+		             flex items-center justify-center gap-2"
+		    >
+		      <span id="checkButtonText" class="flex items-center gap-2">
+			      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-mail-search"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 19h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v4.5" /><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M20.2 20.2l1.8 1.8" /><path d="M3 7l9 6l9 -6" /></svg>
+			      Check SMS
+		      </span>
+			
+    		  <span
+		        id="checkSpinner"
+		        class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+		      ></span>
+		    </button>
+      </form>
+
+      <div id="result" class="hidden mt-6 w-full"></div>
+    </div>
+
+    <footer class="mt-auto mb-4 text-gray-500 text-sm text-center">
+      SMS Checker - DODA 2025 Team 20 - <a href="/about" class="text-blue-600 hover:underline">About</a> - <a href="https://github.com/doda2025-team20" target="_blank" class="text-blue-600 hover:underline">GitHub</a></br>
+      Using Model API at <a th:href="${hostname}" class="text-blue-600 hover:underline" target="_blank" th:text="${hostname}">hostname</a>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  </body>
 </html>
