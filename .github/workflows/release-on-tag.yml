@@ -1,9 +1,7 @@
-name: Release multi-arch image on tag
+name: Release Application
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
     branches:
       - main
 
@@ -12,8 +10,55 @@ permissions:
   packages: write
 
 jobs:
-  release_on_tag:
-    if: startsWith(github.ref, 'refs/tags/')  # only runs for tag pushes
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      is_snapshot: ${{ steps.check_snapshot.outputs.is_snapshot }}
+      tag_exists: ${{ steps.check_tag.outputs.tag_exists }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history to check for existing tags
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+          
+      - name: Extract version from pom.xml
+        id: get_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+          
+      - name: Check if version is a snapshot
+        id: check_snapshot
+        run: |
+          if [[ "${{ steps.get_version.outputs.version }}" == *"-SNAPSHOT" ]]; then
+            echo "is_snapshot=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_snapshot=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          TAG="v${{ steps.get_version.outputs.version }}"
+          if git show-ref --tags --quiet --verify "refs/tags/$TAG"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG already exists. Skipping release."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG does not exist. Proceeding with release."
+          fi
+    
+  # Release official version if not snapshot and tag doesn't exist
+  release:
+    needs: check-version
+    if: needs.check-version.outputs.is_snapshot == 'false' && needs.check-version.outputs.tag_exists == 'false'
     uses: doda2025-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
     permissions:
       contents: read
@@ -23,9 +68,30 @@ jobs:
       context: .
       dockerfile: ./Dockerfile
       platforms: linux/amd64,linux/arm64
+      version: ${{ needs.check-version.outputs.version }}
+      add_latest: true
     secrets: inherit
-  release_on_main:
-    if: github.ref == 'refs/heads/main'      # only runs for pushes to main
+    
+  # Create Git tag after successful release to sync Git with pom.xml
+  create-tag:
+    needs: [check-version, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create and push tag
+        run: |
+          TAG="v${{ needs.check-version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $TAG
+          git push origin $TAG
+
+  # Build snapshot for testing on main push (if version is SNAPSHOT)
+  build-snapshot:
+    needs: check-version
+    if: needs.check-version.outputs.is_snapshot == 'true'
     uses: doda2025-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
     permissions:
       contents: read
@@ -38,4 +104,3 @@ jobs:
       version: ${{ format('main-{0}', github.sha) }}
       add_latest: false
     secrets: inherit
-
