@@ -66,8 +66,8 @@ Container images are automatically published via GitHub Actions, using the `pom.
 
 When the version in `pom.xml` is updated to a release version (e.g., `1.0.0`) on the `main` branch:
 
-1. A Docker image is built and pushed to GHCR with tags `:1.0.0` and `:latest`.
-2. A Git tag (e.g., `v1.0.0`) is automatically created and pushed to the repository.
+1.  A Git tag (e.g., `v1.0.0`) is automatically created and pushed to the repository.
+2. A Docker image is built and pushed to GHCR with tags `:1.0.0` and `:latest`.
 
 ### Snapshot Builds
 
