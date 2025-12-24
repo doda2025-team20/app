@@ -18,10 +18,10 @@ public class MetricsController {
     private static final AtomicReference<Double> lastHamConfidence  = new AtomicReference<>(0.0);
 
     // Histogram buckets
-    private static final AtomicLong bucket_01 = new AtomicLong(0);  // ≤ 0.1s
-    private static final AtomicLong bucket_03 = new AtomicLong(0);  // ≤ 0.3s
-    private static final AtomicLong bucket_10 = new AtomicLong(0);  // ≤ 1.0s
-    private static final AtomicLong bucket_inf = new AtomicLong(0); // ≤ +Inf (all requests)
+    private static final AtomicLong bucket_01 = new AtomicLong(0);  // <= 0.1s
+    private static final AtomicLong bucket_03 = new AtomicLong(0);  // <= 0.3s
+    private static final AtomicLong bucket_10 = new AtomicLong(0);  // <= 1.0s
+    private static final AtomicLong bucket_inf = new AtomicLong(0); // <= +Inf (all requests)
     
     private static final AtomicReference<Double> totalDuration = new AtomicReference<>(0.0);
     private static final AtomicLong durationCount = new AtomicLong(0);
@@ -39,7 +39,7 @@ public class MetricsController {
             lastHamConfidence.set(confidence);
         }
 
-        // Each bucket includes ALL requests up to that threshold
+        // Each bucket includes all requests up to that threshold
         if (durationSeconds <= 0.1) {
             bucket_01.incrementAndGet();
         }
@@ -49,7 +49,7 @@ public class MetricsController {
         if (durationSeconds <= 1.0) {
             bucket_10.incrementAndGet();
         }
-        // +Inf bucket includes ALL requests
+        // +Inf bucket includes all requests
         bucket_inf.incrementAndGet();
 
         // Histogram summary
