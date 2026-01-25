@@ -59,26 +59,24 @@ public class FrontendController {
     @PostMapping({ "", "/" })
     @ResponseBody
     public Sms predict(@RequestBody Sms sms) {
-
-        long start = System.nanoTime(); // Start latency timer
-
+        long start = System.nanoTime();
         System.out.printf("Requesting prediction for \"%s\" ...\n", sms.sms);
-
+        
         // Perform prediction via model-service
         sms.result = getPrediction(sms);
         System.out.printf("Prediction: %s\n", sms.result);
-
-        long end = System.nanoTime(); // End timer
+        
+        long end = System.nanoTime();
         double durationSeconds = (end - start) / 1_000_000_000.0;
-
-        // Until your model-service returns confidence → placeholder
-        double confidence = 0.5;
-
+        
         boolean isSpam = sms.result.equalsIgnoreCase("spam");
-
-        // A3-required metrics instrumentation
+        
+        // Use real confidence from model (or default to 0.5 if not available)
+        double confidence = (sms.confidence > 0) ? sms.confidence : 0.5;
+        
+        // Record metrics
         MetricsController.recordClassification(isSpam, confidence, durationSeconds);
-
+        
         return sms;
     }
 
