@@ -59,68 +59,72 @@ public class FrontendController {
     @PostMapping({ "", "/" })
     @ResponseBody
     public Sms predict(@RequestBody Sms sms) {
+        long start = System.nanoTime();
+
         if (sms.bulk != null && !sms.bulk.isEmpty()) {
-            long start = System.nanoTime(); // Start latency timer
+            Sms[] results = getBulkPredictions(sms);
 
-            String[] results = getBulkPredictions(sms);
-            sms.bulkResults = java.util.Arrays.asList(results);
-
-            long end = System.nanoTime(); // End timer
+            long end = System.nanoTime();
             double durationSeconds = (end - start) / 1_000_000_000.0;
             double avgDuration = durationSeconds / sms.bulk.size();
 
-            for (String res : results) {
-                MetricsController.recordClassification(res.equalsIgnoreCase("spam"), 0.5, avgDuration);
+            java.util.List<String> bulkResults = new java.util.ArrayList<>();
+            for (Sms resSms : results) {
+                if (resSms.result == null || resSms.result.isEmpty() || Double.isNaN(resSms.confidence)) {
+                    throw new RuntimeException("Model service returned null result for bulk prediction");
+                }
+
+                bulkResults.add(resSms.result);
+
+                boolean isSpam = resSms.result.equalsIgnoreCase("spam");
+                MetricsController.recordClassification(isSpam, resSms.confidence, avgDuration);
                 MetricsController.recordMode(true);
             }
+
+            sms.bulkResults = bulkResults;
 
             return sms;
         }
         
-        long start = System.nanoTime(); // Start latency timer
-
-        System.out.printf("Requesting prediction for \"%s\" ...\n", sms.sms);
-        
-        // Perform prediction via model-service
-        sms.result = getPrediction(sms);
-        System.out.printf("Prediction: %s\n", sms.result);
+        sms = getPrediction(sms);
         
         long end = System.nanoTime();
         double durationSeconds = (end - start) / 1_000_000_000.0;
         
         boolean isSpam = sms.result.equalsIgnoreCase("spam");
         
-        // Use real confidence from model (or default to 0.5 if not available)
-        double confidence = (sms.confidence > 0) ? sms.confidence : 0.5;
-        
-        // Record metrics
-        MetricsController.recordClassification(isSpam, confidence, durationSeconds);
+        MetricsController.recordClassification(isSpam, sms.confidence, durationSeconds);
         MetricsController.recordMode(false);
 
         return sms;
     }
 
-    private String getPrediction(Sms sms) {
+    private Sms getPrediction(Sms sms) {
         try {
             var url = new URI(modelHost + "/predict");
             var c = rest.build().postForEntity(url, sms, Sms.class);
-            return c.getBody().result.trim();
+            Sms responseSms = c.getBody();
+            if (responseSms == null) {
+                throw new RuntimeException("Model service returned null response for prediction");
+            }
+            if (responseSms.result == null || responseSms.result.isEmpty() || Double.isNaN(responseSms.confidence)) {
+                throw new RuntimeException("Model service returned null result for prediction");
+            }
+            return responseSms;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String[] getBulkPredictions(Sms sms) {
+    private Sms[] getBulkPredictions(Sms sms) {
         try {
             var url = new URI(modelHost + "/bulk");
             var c = rest.build().postForEntity(url, sms, Sms[].class);
             Sms[] smsArray = c.getBody();
-            
-            String[] results = new String[smsArray.length];
-            for (int i = 0; i < smsArray.length; i++) {
-                results[i] = smsArray[i].result;
+            if (smsArray == null) {
+                throw new RuntimeException("Model service returned null response for bulk prediction");
             }
-            return results;
+            return smsArray;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
