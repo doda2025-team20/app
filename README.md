@@ -58,6 +58,25 @@ You can override these when running the container:
 docker run -e MODEL_HOST="http://other-host:9000" ...
 ```
 
+## Automated Releases
+
+Container images are automatically published via GitHub Actions, using the `pom.xml` version as the single source of truth.
+
+### Official Releases
+
+When the version in `pom.xml` is updated to a release version (e.g., `1.0.0`) on the `main` branch:
+
+1.  A Git tag (e.g., `v1.0.0`) is automatically created and pushed to the repository.
+2. A Docker image is built and pushed to GHCR with tags `:1.0.0` and `:latest`.
+
+### Snapshot Builds
+
+When the version in `pom.xml` is a snapshot (e.g., `1.0.1-SNAPSHOT`):
+
+1. A Docker image is built and pushed to GHCR for testing purposes.
+2. The image is tagged with `main-<commit-sha>` (e.g., `:main-7b3f1a`).
+3. No Git tag is created, and the `:latest` tag is not updated.
+
 ## Notes
 
 The Dockerfile uses a two-stage build:
