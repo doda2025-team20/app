@@ -59,7 +59,26 @@ public class FrontendController {
     @PostMapping({ "", "/" })
     @ResponseBody
     public Sms predict(@RequestBody Sms sms) {
-        long start = System.nanoTime();
+        if (sms.bulk != null && !sms.bulk.isEmpty()) {
+            long start = System.nanoTime(); // Start latency timer
+
+            String[] results = getBulkPredictions(sms);
+            sms.bulkResults = java.util.Arrays.asList(results);
+
+            long end = System.nanoTime(); // End timer
+            double durationSeconds = (end - start) / 1_000_000_000.0;
+            double avgDuration = durationSeconds / sms.bulk.size();
+
+            for (String res : results) {
+                MetricsController.recordClassification(res.equalsIgnoreCase("spam"), 0.5, avgDuration);
+                MetricsController.recordMode(true);
+            }
+
+            return sms;
+        }
+        
+        long start = System.nanoTime(); // Start latency timer
+
         System.out.printf("Requesting prediction for \"%s\" ...\n", sms.sms);
         
         // Perform prediction via model-service
@@ -76,7 +95,8 @@ public class FrontendController {
         
         // Record metrics
         MetricsController.recordClassification(isSpam, confidence, durationSeconds);
-        
+        MetricsController.recordMode(false);
+
         return sms;
     }
 
@@ -85,6 +105,22 @@ public class FrontendController {
             var url = new URI(modelHost + "/predict");
             var c = rest.build().postForEntity(url, sms, Sms.class);
             return c.getBody().result.trim();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String[] getBulkPredictions(Sms sms) {
+        try {
+            var url = new URI(modelHost + "/bulk");
+            var c = rest.build().postForEntity(url, sms, Sms[].class);
+            Sms[] smsArray = c.getBody();
+            
+            String[] results = new String[smsArray.length];
+            for (int i = 0; i < smsArray.length; i++) {
+                results[i] = smsArray[i].result;
+            }
+            return results;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

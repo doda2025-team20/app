@@ -3,6 +3,23 @@ $(document).ready(function () {
     return $("#smsInput").val().trim();
   }
 
+  async function getFileSMS() {
+    var fileInput = document.getElementById("fileInput");
+    if (fileInput.files.length == 0) {
+      console.log("No file selected");
+      return null;
+    }
+    
+    var file = fileInput.files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    await new Promise((resolve, reject) => {
+      reader.onload = resolve;
+      reader.onerror = reject;
+    });
+    return reader.result;
+  }
+
   function getGuess() {
     return $("input[name='guess']:checked").val().trim();
   }
@@ -14,9 +31,38 @@ $(document).ready(function () {
     $("#result").html();
   }
 
-  $("#checkButton").click(function (e) {
+  $("#checkButton").click(async function (e) {
     e.stopPropagation();
     e.preventDefault();
+
+    var fileSMS = await getFileSMS();
+    if (fileSMS !== null) {
+      console.log("Bulk mode activated");
+      startLoading();
+
+      const smsList = fileSMS.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+      const payload = JSON.stringify({ bulk: smsList });
+
+      $.ajax({
+        type: "POST",
+        url: "./",
+        data: payload,
+        contentType: "application/json",
+        dataType: "json",
+        success: function (res) {
+          stopLoading();
+          handleResult(res);
+        },
+        error: function (err) {
+          stopLoading();
+          handleError(err);
+        },
+      });
+
+      $("#fileInput").val("");
+
+      return;
+    }
 
     var sms = getSMS();
     var guess = getGuess();
@@ -41,6 +87,24 @@ $(document).ready(function () {
   });
 
   function handleResult(res) {
+    if (res.bulkResults) {
+      let resultHtml = '';
+      for (let i = 0; i < res.bulkResults.length; i++) {
+        const smsText = res.bulk[i];
+        const prediction = res.bulkResults[i];
+        resultHtml += `
+          <div class="mb-4 p-4 border rounded-lg ${'ham' === prediction ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}">
+            <strong>SMS:</strong> ${smsText}<br/>
+            <strong>Prediction:</strong> ${prediction}<br/>
+          </div>
+        `;
+      }
+      cleanResult();
+      $("#result").html(resultHtml);
+      $("#result").removeClass("hidden");
+      return;
+    }
+
     var wasRight = res.result == getGuess();
     cleanResult();
 
