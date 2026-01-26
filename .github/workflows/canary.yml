@@ -1,0 +1,26 @@
+name: Release Application
+
+on:
+  push:
+    branches:
+      - canary
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:    
+  # Release the canary version after successful create-tag
+  release:
+    uses: doda2025-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
+    permissions:
+      contents: read
+      packages: write
+    with:
+      image: ghcr.io/doda2025-team20/app
+      context: .
+      dockerfile: ./Dockerfile
+      platforms: linux/amd64,linux/arm64
+      version: canary
+      add_latest: false
+    secrets: inherit
