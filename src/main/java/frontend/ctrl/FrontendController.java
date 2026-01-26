@@ -59,34 +59,32 @@ public class FrontendController {
     @PostMapping({ "", "/" })
     @ResponseBody
     public Sms predict(@RequestBody Sms sms) {
-
-        long start = System.nanoTime(); // Start latency timer
-
-        System.out.printf("Requesting prediction for \"%s\" ...\n", sms.sms);
-
-        // Perform prediction via model-service
-        sms.result = getPrediction(sms);
-        System.out.printf("Prediction: %s\n", sms.result);
-
-        long end = System.nanoTime(); // End timer
+        long start = System.nanoTime();
+        
+        sms = getPrediction(sms);
+        
+        long end = System.nanoTime();
         double durationSeconds = (end - start) / 1_000_000_000.0;
-
-        // Until your model-service returns confidence → placeholder
-        double confidence = 0.5;
-
+        
         boolean isSpam = sms.result.equalsIgnoreCase("spam");
-
-        // A3-required metrics instrumentation
-        MetricsController.recordClassification(isSpam, confidence, durationSeconds);
-
+        
+        MetricsController.recordClassification(isSpam, sms.confidence, durationSeconds);
+        
         return sms;
     }
 
-    private String getPrediction(Sms sms) {
+    private Sms getPrediction(Sms sms) {
         try {
             var url = new URI(modelHost + "/predict");
             var c = rest.build().postForEntity(url, sms, Sms.class);
-            return c.getBody().result.trim();
+            Sms responseSms = c.getBody();
+            if (responseSms == null) {
+                throw new RuntimeException("Model service returned null response for prediction");
+            }
+            if (responseSms.result == null || responseSms.result.isEmpty() || Double.isNaN(responseSms.confidence)) {
+                throw new RuntimeException("Model service returned null result for prediction");
+            }
+            return responseSms;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
