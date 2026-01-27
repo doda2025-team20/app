@@ -60,31 +60,31 @@ public class FrontendController {
     @ResponseBody
     public Sms predict(@RequestBody Sms sms) {
         long start = System.nanoTime();
-        System.out.printf("Requesting prediction for \"%s\" ...\n", sms.sms);
         
-        // Perform prediction via model-service
-        sms.result = getPrediction(sms);
-        System.out.printf("Prediction: %s\n", sms.result);
+        sms = getPrediction(sms);
         
         long end = System.nanoTime();
         double durationSeconds = (end - start) / 1_000_000_000.0;
         
         boolean isSpam = sms.result.equalsIgnoreCase("spam");
         
-        // Use real confidence from model (or default to 0.5 if not available)
-        double confidence = (sms.confidence > 0) ? sms.confidence : 0.5;
-        
-        // Record metrics
-        MetricsController.recordClassification(isSpam, confidence, durationSeconds);
+        MetricsController.recordClassification(isSpam, sms.confidence, durationSeconds);
         
         return sms;
     }
 
-    private String getPrediction(Sms sms) {
+    private Sms getPrediction(Sms sms) {
         try {
             var url = new URI(modelHost + "/predict");
             var c = rest.build().postForEntity(url, sms, Sms.class);
-            return c.getBody().result.trim();
+            Sms responseSms = c.getBody();
+            if (responseSms == null) {
+                throw new RuntimeException("Model service returned null response for prediction");
+            }
+            if (responseSms.result == null || responseSms.result.isEmpty() || Double.isNaN(responseSms.confidence)) {
+                throw new RuntimeException("Model service returned null result for prediction");
+            }
+            return responseSms;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
