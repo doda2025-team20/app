@@ -30,6 +30,10 @@ public class MetricsController {
     private static final AtomicReference<Double> totalDuration = new AtomicReference<>(0.0);
     private static final AtomicLong durationCount = new AtomicLong(0);
 
+    // Canary bulk function metrics
+    private static final AtomicLong bulkRequestCount = new AtomicLong(0);
+    private static final AtomicLong normalRequestCount = new AtomicLong(0);
+
     // Version from environment variable
     private static String version = "v1"; // default
     
@@ -75,6 +79,14 @@ public class MetricsController {
         totalDuration.updateAndGet(v -> v + durationSeconds);
     }
 
+    public static void recordMode(boolean isBulk) {
+        if (isBulk) {
+            bulkRequestCount.incrementAndGet();
+        } else {
+            normalRequestCount.incrementAndGet();
+        }
+    }
+
     @GetMapping(value = "/metrics", produces = "text/plain")
     public String metrics() {
         StringBuilder sb = new StringBuilder();
@@ -116,6 +128,12 @@ public class MetricsController {
         sb.append("# TYPE sms_ui_clicks_total counter\n");
         sb.append("sms_ui_clicks_total{version=\"").append(version).append("\"} ")
         .append(uiClicksCounter.get()).append("\n\n");
+
+        // Canary
+        sb.append("\n# HELP sms_request_mode_total Total number of requests by mode\n");
+        sb.append("# TYPE sms_request_mode_total counter\n");
+        sb.append("sms_request_mode_total{mode=\"bulk\"} ").append(bulkRequestCount.get()).append("\n");
+        sb.append("sms_request_mode_total{mode=\"normal\"} ").append(normalRequestCount.get()).append("\n");
 
         return sb.toString();
     }

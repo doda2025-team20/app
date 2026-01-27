@@ -20,7 +20,8 @@
       </h1>
 	    <p class="mb-6 text-center text-gray-600">
 		    Enter an SMS message below and select whether you think it's ham or spam.
-		    Click "Check SMS" to see if the classifier agrees with your guess!
+		    Click "Check SMS" to see if the classifier agrees with your guess! Alternatively,
+        upload a .txt file with SMS messages (one per line) for bulk checking.
 	    </p>
 
       <form
@@ -126,6 +127,20 @@
             </label>
           </li>
         </ul>
+
+        <span class="block mt-4">
+          <label
+            for="fileInput"
+            class="block mb-2 text-md font-medium text-gray-700">
+            Alternatively, upload a .txt file with SMS messages (one per line):
+          </label>
+            <input
+            type="file"
+            id="fileInput"
+            accept=".txt"
+            class="w-full text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+		    </span>
 
         <button
 		      type="button"
