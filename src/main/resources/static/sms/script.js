@@ -48,6 +48,24 @@ $(document).ready(function() {
 		$("#result").html("An error occured (see server log).")
 		$("#result").show()
 	}
+
+	function handleResult(res) {
+		var wasRight = res.result == getGuess();
+
+		cleanResult();
+		$("#result").addClass(wasRight ? "correct" : "incorrect");
+		$("#result").html("The classifier " + (wasRight ? "agrees" : "disagrees"));
+		$("#result").show();
+
+		// Record UI metric: click with correctness
+		$.ajax({
+			type: "POST",
+			url: "/metrics/ui",   // new endpoint
+			data: JSON.stringify({correct: wasRight}),
+			contentType: "application/json"
+		});
+	}
+
 	
 	$("textarea").on('keypress',function(e) {
 		$("#result").hide()

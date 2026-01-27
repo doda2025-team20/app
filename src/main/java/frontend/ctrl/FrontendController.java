@@ -89,4 +89,11 @@ public class FrontendController {
             throw new RuntimeException(e);
         }
     }
+
+    @PostMapping("/metrics/ui")
+    @ResponseBody
+    public void recordUiMetric(@RequestBody Map<String, Boolean> body) {
+        boolean correct = body.getOrDefault("correct", false);
+        MetricsController.recordUiClick(correct);
+    }
 }
