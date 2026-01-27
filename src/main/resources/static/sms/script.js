@@ -14,9 +14,18 @@ $(document).ready(function () {
     $("#result").html();
   }
 
+  function submitButtonMetric() {
+    $.ajax({
+        type: "POST",
+        url: "/telemetry",
+    });
+  }
+
   $("#checkButton").click(function (e) {
     e.stopPropagation();
     e.preventDefault();
+
+    submitButtonMetric();
 
     var sms = getSMS();
     var guess = getGuess();
@@ -43,14 +52,6 @@ $(document).ready(function () {
 
   function handleResult(res) {
 	var wasRight = res.result == getGuess();
-	
-	// Record UI click
-    $.ajax({
-        type: "POST",
-        url: "/metrics/ui",
-        data: JSON.stringify({ correct: wasRight }),
-        contentType: "application/json"
-    });
     cleanResult();
 
     if (wasRight) {

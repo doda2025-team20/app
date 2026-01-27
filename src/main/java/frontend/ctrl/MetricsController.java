@@ -42,7 +42,7 @@ public class MetricsController {
         System.out.println("MetricsController initialized with version: " + version);
     }
 
-    public static void recordUiClick(boolean correct) {
+    public static void recordUiClick() {
         uiClicksCounter.incrementAndGet();
     }
 
@@ -109,7 +109,7 @@ public class MetricsController {
         sb.append("sms_request_duration_seconds_sum{version=\"").append(version).append("\"} ")
             .append(totalDuration.get()).append("\n");
         sb.append("sms_request_duration_seconds_count{version=\"").append(version).append("\"} ")
-            .append(durationCount.get()).append("\n");
+            .append(durationCount.get()).append("\n\n");
 
         // Counter for UI Clicks
         sb.append("# HELP sms_ui_clicks_total Number of times users clicked submit on UI\n");
