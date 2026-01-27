@@ -95,7 +95,6 @@ $(document).ready(function () {
     });
   });
 
-
   function handleResult(res) {
     if (res.bulkResults) {
       let resultHtml = '';
