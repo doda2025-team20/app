@@ -44,7 +44,7 @@
         <dependency>
             <groupId>sms</groupId>
             <artifactId>lib-version</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.5-assignment1-review-20251216-232415</version>
         </dependency>
     </dependencies>
 

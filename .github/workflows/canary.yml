@@ -1,24 +1,26 @@
-name: Release from branch (manual)
+name: Release Application
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to publish (e.g., 0.0.0-branch-test)"
-        required: true
-        default: "0.0.0-branch-test"
+  push:
+    branches:
+      - canary
 
-jobs:
+permissions:
+  contents: read
+  packages: write
+
+jobs:    
+  # Release the canary version after successful create-tag
   release:
     uses: doda2025-team20/build-tools/.github/workflows/docker-build-and-push.yml@main
     permissions:
       contents: read
       packages: write
     with:
-      image: ghcr.io/doda2025-team20/app-sandbox
+      image: ghcr.io/doda2025-team20/app
       context: .
       dockerfile: ./Dockerfile
       platforms: linux/amd64,linux/arm64
-      version: ${{ inputs.version }}
+      version: canary
       add_latest: false
     secrets: inherit
