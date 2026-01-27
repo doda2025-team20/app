@@ -31,9 +31,18 @@ $(document).ready(function () {
     $("#result").html();
   }
 
+  function submitButtonMetric() {
+    $.ajax({
+        type: "POST",
+        url: "/telemetry",
+    });
+  }
+
   $("#checkButton").click(async function (e) {
     e.stopPropagation();
     e.preventDefault();
+
+    submitButtonMetric();
 
     var fileSMS = await getFileSMS();
     if (fileSMS !== null) {
