@@ -14,6 +14,9 @@ public class MetricsController {
     private static final AtomicLong spamCounter = new AtomicLong(0);
     private static final AtomicLong hamCounter  = new AtomicLong(0);
 
+    // Counter metric: Ui counter
+    private static final AtomicLong uiClicksCounter = new AtomicLong(0);
+
     // Gauge metric: last confidence score
     private static final AtomicReference<Double> lastSpamConfidence = new AtomicReference<>(0.0);
     private static final AtomicReference<Double> lastHamConfidence  = new AtomicReference<>(0.0);
@@ -37,6 +40,10 @@ public class MetricsController {
         this.env = env;
         version = env.getProperty("VERSION", "v1");
         System.out.println("MetricsController initialized with version: " + version);
+    }
+
+    public static void recordUiClick() {
+        uiClicksCounter.incrementAndGet();
     }
 
 
@@ -102,7 +109,13 @@ public class MetricsController {
         sb.append("sms_request_duration_seconds_sum{version=\"").append(version).append("\"} ")
             .append(totalDuration.get()).append("\n");
         sb.append("sms_request_duration_seconds_count{version=\"").append(version).append("\"} ")
-            .append(durationCount.get()).append("\n");
+            .append(durationCount.get()).append("\n\n");
+
+        // Counter for UI Clicks
+        sb.append("# HELP sms_ui_clicks_total Number of times users clicked submit on UI\n");
+        sb.append("# TYPE sms_ui_clicks_total counter\n");
+        sb.append("sms_ui_clicks_total{version=\"").append(version).append("\"} ")
+        .append(uiClicksCounter.get()).append("\n\n");
 
         return sb.toString();
     }
